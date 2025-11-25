@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  # PostgreSQL Database Service
+  db:
+    image: postgres:13
+    container_name: fullstack-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - fullstack-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Service (Express + Node.js)
+  backend:
+    build: ./backend
+    container_name: fullstack-backend
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - fullstack-network
+    restart: unless-stopped
+
+  # Frontend Service (React)
+  frontend:
+    build: ./frontend
+    container_name: fullstack-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - fullstack-network
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+# Define named volume for database persistence
+volumes:
+  db-data:
+
+# Define custom network
+networks:
+  fullstack-network:
+    driver: bridge

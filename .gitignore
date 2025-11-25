@@ -1,0 +1,27 @@
+# For Windows
+type nul > .gitignore
+
+# For Mac/Linux
+touch .gitignore
+```
+
+Add this content:
+```
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Environment variables (if they contain sensitive data)
+# .env
+
+# Database data
+db-data/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
